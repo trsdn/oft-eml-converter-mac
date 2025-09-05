@@ -66,9 +66,12 @@ print_status $BLUE "📁 Checking Required Files..."
 REQUIRED_FILES=(
     "src/converter.py"
     "src/OFTEMLConverter.swift"
-    "examples/sample.oft"
     "tests/test_converter.py"
     "tests/test_app.swift"
+)
+
+OPTIONAL_FILES=(
+    "examples/sample.oft"
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
@@ -77,6 +80,14 @@ for file in "${REQUIRED_FILES[@]}"; do
     else
         print_status $RED "❌ $file missing"
         exit 1
+    fi
+done
+
+for file in "${OPTIONAL_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        print_status $GREEN "✅ $file (optional)"
+    else
+        print_status $YELLOW "⚠️  $file not found (optional - tests will skip)"
     fi
 done
 
