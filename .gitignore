@@ -68,5 +68,6 @@ ENV/
 # Logs
 *.log
 
-# Examples directory (contains test OFT files)
-examples/
+# Large OFT test files (keep minimal test files)
+examples/*.oft
+!examples/sample.oft
