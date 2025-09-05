@@ -1,0 +1,44 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        chmod +x scripts/setup.sh
+        ./scripts/setup.sh
+    
+    - name: Run test suite
+      run: |
+        chmod +x scripts/test.sh
+        ./scripts/test.sh
+    
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-outputs
+        path: |
+          *.eml
+          *.log
+        retention-days: 7
+    
+    - name: Check app bundle
+      run: |
+        ls -la OFT-EML-Converter.app/Contents/
+        file OFT-EML-Converter.app/Contents/MacOS/OFT-EML-Converter
