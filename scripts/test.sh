@@ -96,7 +96,22 @@ echo ""
 print_status $BLUE "🐍 Running Python Tests..."
 echo "----------------------------------------"
 
-if python3 tests/test_converter.py; then
+# Find a Python with extract_msg available
+PYTHON_CMD=""
+for python_path in "/opt/homebrew/bin/python3" "/usr/bin/python3" "/usr/local/bin/python3" "python3"; do
+    if command -v "$python_path" &> /dev/null; then
+        if "$python_path" -c "import extract_msg" 2>/dev/null; then
+            PYTHON_CMD="$python_path"
+            print_status $BLUE "Using Python: $PYTHON_CMD"
+            break
+        fi
+    fi
+done
+
+if [ -z "$PYTHON_CMD" ]; then
+    print_status $RED "❌ No Python with extract_msg found"
+    PYTHON_TESTS_PASSED=false
+elif $PYTHON_CMD tests/test_converter.py; then
     PYTHON_TESTS_PASSED=true
     print_status $GREEN "✅ Python tests completed successfully"
 else

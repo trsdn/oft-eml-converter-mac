@@ -26,18 +26,11 @@ for path in import_paths:
     if abs_path not in sys.path:
         sys.path.insert(0, abs_path)
 
-# Debug information
-print(f"Current working directory: {os.getcwd()}")
-print(f"Test file directory: {os.path.dirname(__file__)}")
-print(f"Python path: {sys.path[:3]}")  # Show first 3 paths
-print(f"Looking for converter.py in: {[p for p in sys.path[:3]]}")
-
 try:
     from converter import convert_oft_to_eml
-    print("✅ Successfully imported converter module")
 except ImportError as e:
     print(f"❌ Could not import converter module: {e}")
-    print(f"Files in src/: {os.listdir('src') if os.path.exists('src') else 'src/ not found'}")
+    print(f"Make sure src/converter.py exists and extract_msg is installed for this Python.")
     sys.exit(1)
 
 try:
