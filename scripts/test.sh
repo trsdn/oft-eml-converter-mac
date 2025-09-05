@@ -96,13 +96,11 @@ echo ""
 print_status $BLUE "🐍 Running Python Tests..."
 echo "----------------------------------------"
 
-if cd tests && python3 test_converter.py; then
+if python3 tests/test_converter.py; then
     PYTHON_TESTS_PASSED=true
     print_status $GREEN "✅ Python tests completed successfully"
-    cd ..
 else
     print_status $RED "❌ Python tests failed"
-    cd ..
 fi
 
 echo ""
