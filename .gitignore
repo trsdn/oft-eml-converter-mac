@@ -68,3 +68,6 @@ test_*.py
 
 # Logs
 *.log
+
+# Examples directory (contains test OFT files)
+examples/

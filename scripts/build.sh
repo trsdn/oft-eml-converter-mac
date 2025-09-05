@@ -37,13 +37,36 @@ fi
 echo "📦 Copying Python converter..."
 cp src/converter.py "OFT-EML-Converter.app/Contents/Resources/"
 
-# Copy app icon if available
+# Create and install app icon
 if [ -f "assets/icon.png" ]; then
-    echo "🎨 Adding app icon..."
-    # Convert PNG to ICNS format (requires iconutil on macOS)
-    mkdir -p "OFT-EML-Converter.app/Contents/Resources/AppIcon.iconset"
-    # For now, just copy the PNG - proper ICNS conversion would need multiple sizes
+    echo "🎨 Creating app icon..."
+    
+    # Create iconset directory
+    ICONSET_DIR="OFT-EML-Converter.iconset"
+    mkdir -p "$ICONSET_DIR"
+    
+    # Create multiple icon sizes using sips (built-in macOS tool)
+    sips -z 16 16     assets/icon.png --out "$ICONSET_DIR/icon_16x16.png" >/dev/null 2>&1
+    sips -z 32 32     assets/icon.png --out "$ICONSET_DIR/icon_16x16@2x.png" >/dev/null 2>&1
+    sips -z 32 32     assets/icon.png --out "$ICONSET_DIR/icon_32x32.png" >/dev/null 2>&1
+    sips -z 64 64     assets/icon.png --out "$ICONSET_DIR/icon_32x32@2x.png" >/dev/null 2>&1
+    sips -z 128 128   assets/icon.png --out "$ICONSET_DIR/icon_128x128.png" >/dev/null 2>&1
+    sips -z 256 256   assets/icon.png --out "$ICONSET_DIR/icon_128x128@2x.png" >/dev/null 2>&1
+    sips -z 256 256   assets/icon.png --out "$ICONSET_DIR/icon_256x256.png" >/dev/null 2>&1
+    sips -z 512 512   assets/icon.png --out "$ICONSET_DIR/icon_256x256@2x.png" >/dev/null 2>&1
+    sips -z 512 512   assets/icon.png --out "$ICONSET_DIR/icon_512x512.png" >/dev/null 2>&1
+    sips -z 1024 1024 assets/icon.png --out "$ICONSET_DIR/icon_512x512@2x.png" >/dev/null 2>&1
+    
+    # Convert to icns format
+    iconutil -c icns "$ICONSET_DIR" -o "OFT-EML-Converter.app/Contents/Resources/AppIcon.icns" 2>/dev/null
+    
+    # Clean up temporary iconset
+    rm -rf "$ICONSET_DIR"
+    
+    # Also copy the original PNG for fallback
     cp assets/icon.png "OFT-EML-Converter.app/Contents/Resources/icon.png"
+    
+    echo "✅ App icon installed"
 fi
 
 # Copy Info.plist
@@ -59,6 +82,8 @@ cat > "OFT-EML-Converter.app/Contents/Info.plist" << 'EOF'
     <string>com.example.oft-eml-converter</string>
     <key>CFBundleName</key>
     <string>OFT EML Converter</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleShortVersionString</key>
