@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![App Icon](assets/icon.png)
+![OFT to EML Converter Demo](docs/app-demo.gif)
 
 **Convert Outlook Template (.oft) files to EML — just drag and drop.**
 
