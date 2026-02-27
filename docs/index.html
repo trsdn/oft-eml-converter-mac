@@ -3,43 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OFT to EML Converter for macOS</title>
-<meta name="description" content="Convert Outlook Template (.oft) files to EML — just drag and drop. A native macOS app with zero setup.">
+<title>OFT to EML Converter for macOS — Free Drag & Drop Outlook Template Converter</title>
+<meta name="description" content="Free native macOS app to convert Outlook Template (.oft) files to standard EML format. Drag and drop, zero configuration, automatic dependency setup. Built with SwiftUI.">
+<meta name="keywords" content="OFT to EML, Outlook template converter, macOS, OFT converter, EML converter, MSG to EML, Outlook, email converter, SwiftUI, drag and drop, free">
+<meta name="author" content="Torsten">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://trsdn.github.io/oft-eml-converter-mac/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="OFT to EML Converter for macOS">
+<meta property="og:description" content="Convert Outlook Template (.oft) files to EML — just drag and drop. A native macOS app with zero setup.">
+<meta property="og:url" content="https://trsdn.github.io/oft-eml-converter-mac/">
+<meta property="og:site_name" content="OFT to EML Converter">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OFT to EML Converter for macOS">
+<meta name="twitter:description" content="Free native macOS app to convert Outlook .oft files to EML. Drag & drop, zero setup.">
+
+<!-- Favicon (inline SVG) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230071e3'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='system-ui' font-size='30' font-weight='700' fill='white'%3E%E2%9C%89%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230071e3'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='system-ui' font-size='30' font-weight='700' fill='white'%3E%E2%9C%89%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#111111">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "OFT to EML Converter",
+  "operatingSystem": "macOS 14+",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Free native macOS app to convert Outlook Template (.oft) files to standard EML format with drag and drop.",
+  "url": "https://trsdn.github.io/oft-eml-converter-mac/",
+  "downloadUrl": "https://github.com/trsdn/oft-eml-converter-mac/releases/latest",
+  "softwareVersion": "2.0.0",
+  "author": {
+    "@type": "Person",
+    "name": "Torsten",
+    "url": "https://aitorsten.com"
+  },
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
 <style>
 :root {
-  --bg: #fafafa;
-  --bg2: #ffffff;
-  --fg: #1d1d1f;
-  --fg2: #6e6e73;
-  --fg3: #a1a1a6;
-  --accent: #0071e3;
-  --accent2: #147ce5;
-  --green: #34c759;
-  --orange: #ff9f0a;
-  --card: #ffffff;
-  --card-border: #e5e5e7;
-  --code-bg: #f5f5f7;
+  --bg: #111111;
+  --bg2: #1c1c1e;
+  --fg: #f5f5f7;
+  --fg2: #a1a1a6;
+  --fg3: #6e6e73;
+  --accent: #2997ff;
+  --accent2: #5ab4ff;
+  --green: #30d158;
+  --orange: #ffa00a;
+  --card: #1c1c1e;
+  --card-border: #2c2c2e;
+  --code-bg: #2c2c2e;
   --radius: 16px;
-  --shadow: 0 2px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111111;
-    --bg2: #1c1c1e;
-    --fg: #f5f5f7;
-    --fg2: #a1a1a6;
-    --fg3: #6e6e73;
-    --accent: #2997ff;
-    --accent2: #5ab4ff;
-    --green: #30d158;
-    --orange: #ffa00a;
-    --card: #1c1c1e;
-    --card-border: #2c2c2e;
-    --code-bg: #2c2c2e;
-    --shadow: 0 2px 12px rgba(0,0,0,0.3);
-    --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
-  }
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
