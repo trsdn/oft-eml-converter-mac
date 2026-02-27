@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OFT to EML Converter for macOS</title>
+<meta name="description" content="Convert Outlook Template (.oft) files to EML — just drag and drop. A native macOS app with zero setup.">
+<style>
+:root {
+  --bg: #fafafa;
+  --bg2: #ffffff;
+  --fg: #1d1d1f;
+  --fg2: #6e6e73;
+  --fg3: #a1a1a6;
+  --accent: #0071e3;
+  --accent2: #147ce5;
+  --green: #34c759;
+  --orange: #ff9f0a;
+  --card: #ffffff;
+  --card-border: #e5e5e7;
+  --code-bg: #f5f5f7;
+  --radius: 16px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111111;
+    --bg2: #1c1c1e;
+    --fg: #f5f5f7;
+    --fg2: #a1a1a6;
+    --fg3: #6e6e73;
+    --accent: #2997ff;
+    --accent2: #5ab4ff;
+    --green: #30d158;
+    --orange: #ffa00a;
+    --card: #1c1c1e;
+    --card-border: #2c2c2e;
+    --code-bg: #2c2c2e;
+    --shadow: 0 2px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+/* Nav */
+nav {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--card-border);
+  padding: 14px 0;
+}
+nav .container { display: flex; align-items: center; justify-content: space-between; }
+nav .logo { font-weight: 600; font-size: 15px; color: var(--fg); text-decoration: none; }
+nav .links { display: flex; gap: 24px; }
+nav .links a { color: var(--fg2); text-decoration: none; font-size: 14px; transition: color .2s; }
+nav .links a:hover { color: var(--accent); }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 80px 0 60px;
+}
+.hero h1 {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.hero h1 .accent { color: var(--accent); }
+.hero .sub {
+  font-size: 20px;
+  color: var(--fg2);
+  max-width: 520px;
+  margin: 0 auto 40px;
+}
+.hero .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 12px;
+  font-size: 15px; font-weight: 500;
+  text-decoration: none; transition: all .2s;
+  cursor: pointer; border: none;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.btn-secondary { background: var(--code-bg); color: var(--fg); border: 1px solid var(--card-border); }
+.btn-secondary:hover { border-color: var(--fg3); transform: translateY(-1px); }
+
+/* App mockup */
+.mockup-wrap {
+  display: flex; justify-content: center;
+  padding: 40px 0 0;
+}
+
+/* Features */
+.features {
+  padding: 80px 0;
+}
+.features h2 {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 48px;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+}
+.feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+.feature-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.feature-card p { font-size: 14px; color: var(--fg2); line-height: 1.5; }
+
+/* How it works */
+.how {
+  padding: 60px 0 80px;
+}
+.how h2 {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 48px;
+}
+.steps {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.step {
+  text-align: center;
+  flex: 1; min-width: 200px; max-width: 260px;
+}
+.step-num {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 20px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+}
+.step h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.step p { font-size: 14px; color: var(--fg2); }
+
+/* Install */
+.install {
+  padding: 60px 0 80px;
+}
+.install-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 40px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.install-card h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.install-card .sub { color: var(--fg2); font-size: 16px; margin-bottom: 28px; }
+.code-block {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 20px 24px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 14px;
+  text-align: left;
+  overflow-x: auto;
+  margin-top: 24px;
+  color: var(--fg2);
+  line-height: 1.8;
+}
+.code-block .cmd { color: var(--fg); }
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--card-border);
+  padding: 32px 0;
+  text-align: center;
+  color: var(--fg3);
+  font-size: 13px;
+}
+footer a { color: var(--fg2); text-decoration: none; }
+footer a:hover { color: var(--accent); }
+
+/* SVG animations */
+@keyframes fileDrop {
+  0% { transform: translate(0, -60px); opacity: 0; }
+  20% { transform: translate(0, -60px); opacity: 1; }
+  50% { transform: translate(0, 0); opacity: 1; }
+  55% { transform: translate(0, -4px); }
+  60% { transform: translate(0, 0); }
+  100% { transform: translate(0, 0); opacity: 1; }
+}
+@keyframes spinnerSpin {
+  0% { transform-origin: 236px 195px; transform: rotate(0deg); }
+  100% { transform-origin: 236px 195px; transform: rotate(360deg); }
+}
+@keyframes checkPop {
+  0%, 70% { transform: scale(0); opacity: 0; }
+  85% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes dropZoneGlow {
+  0%, 100% { opacity: 0; }
+  25%, 45% { opacity: 1; }
+  60% { opacity: 0; }
+}
+@keyframes resultSlide {
+  0%, 65% { transform: translateY(20px); opacity: 0; }
+  80% { transform: translateY(-2px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes cursorMove {
+  0% { transform: translate(60px, -80px); }
+  15% { transform: translate(60px, -80px); }
+  45% { transform: translate(0, 0); }
+  100% { transform: translate(0, 0); }
+}
+.anim-file { animation: fileDrop 4s ease-out infinite; }
+.anim-cursor { animation: cursorMove 4s ease-in-out infinite; }
+.anim-spinner { animation: spinnerSpin 1s linear infinite; animation-delay: 2s; }
+.anim-check { animation: checkPop 4s ease-out infinite; }
+.anim-glow { animation: dropZoneGlow 4s ease-in-out infinite; }
+.anim-result { animation: resultSlide 4s ease-out infinite; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a class="logo" href="#">OFT→EML Converter</a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#how">How It Works</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/trsdn/oft-eml-converter-mac">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <h1>Convert <span class="accent">.oft</span> to <span class="accent">.eml</span><br>on your Mac</h1>
+    <p class="sub">Drag and drop Outlook templates. Get standard email files. No setup required.</p>
+    <div class="buttons">
+      <a class="btn btn-primary" href="https://github.com/trsdn/oft-eml-converter-mac/releases/latest">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/trsdn/oft-eml-converter-mac">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.43 9.63 8.21 11.19.6.11.82-.26.82-.57v-2.23c-3.34.72-4.04-1.42-4.04-1.42-.55-1.37-1.33-1.74-1.33-1.74-1.09-.73.08-.72.08-.72 1.2.08 1.84 1.22 1.84 1.22 1.07 1.8 2.8 1.28 3.49.98.1-.76.42-1.28.76-1.57-2.67-.3-5.47-1.31-5.47-5.84 0-1.29.47-2.34 1.24-3.17-.13-.3-.54-1.5.12-3.12 0 0 1-.32 3.3 1.21a11.56 11.56 0 016.01 0c2.3-1.53 3.3-1.21 3.3-1.21.66 1.62.25 2.82.12 3.12.77.83 1.24 1.88 1.24 3.17 0 4.54-2.81 5.53-5.48 5.83.43.37.81 1.1.81 2.22v3.29c0 .31.21.69.82.57A12.01 12.01 0 0024 12.29C24 5.78 18.63.5 12 .5z"/></svg>
+        Source Code
+      </a>
+    </div>
+
+    <div class="mockup-wrap">
+      <!-- Animated app mockup SVG -->
+      <svg width="472" height="360" viewBox="0 0 472 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="App mockup showing drag and drop conversion">
+        <!-- Window chrome -->
+        <rect x="16" y="8" width="440" height="344" rx="12" fill="var(--card)" stroke="var(--card-border)" stroke-width="1"/>
+        <!-- Title bar -->
+        <rect x="16" y="8" width="440" height="36" rx="12" fill="var(--code-bg)"/>
+        <rect x="16" y="32" width="440" height="12" fill="var(--code-bg)"/>
+        <circle cx="38" cy="26" r="6" fill="#FF5F57"/>
+        <circle cx="58" cy="26" r="6" fill="#FEBC2E"/>
+        <circle cx="78" cy="26" r="6" fill="#28C840"/>
+        <text x="236" y="30" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="500" fill="var(--fg2)">OFT to EML Converter</text>
+
+        <!-- Drop zone border (dashed) -->
+        <rect class="anim-glow" x="40" y="60" width="392" height="160" rx="14" stroke="var(--accent)" stroke-width="2" stroke-dasharray="8 5" fill="none" opacity="0"/>
+        <rect x="40" y="60" width="392" height="160" rx="14" stroke="var(--fg3)" stroke-width="1.5" stroke-dasharray="8 5" fill="none" opacity="0.3"/>
+
+        <!-- Drop zone icon & text (idle) -->
+        <text x="236" y="150" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="32" fill="var(--fg3)">📄</text>
+        <text x="236" y="185" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="15" font-weight="500" fill="var(--fg)">Drop OFT Files Here</text>
+        <text x="236" y="205" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="var(--fg3)">Converts Outlook templates to EML format</text>
+
+        <!-- Animated file being dragged in -->
+        <g class="anim-file">
+          <rect x="206" y="120" width="60" height="72" rx="6" fill="var(--accent)" opacity="0.12"/>
+          <rect x="206" y="120" width="60" height="72" rx="6" stroke="var(--accent)" stroke-width="1.5" fill="none"/>
+          <text x="236" y="148" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="18" fill="var(--accent)">📎</text>
+          <text x="236" y="178" text-anchor="middle" font-family="'SF Mono', monospace" font-size="9" font-weight="600" fill="var(--accent)">.oft</text>
+        </g>
+
+        <!-- Result row (slides in) -->
+        <g class="anim-result">
+          <rect x="40" y="240" width="392" height="44" rx="8" fill="var(--code-bg)"/>
+          <!-- Checkmark -->
+          <circle cx="66" cy="262" r="10" fill="var(--green)" opacity="0.15"/>
+          <text x="66" y="267" text-anchor="middle" font-size="14" fill="var(--green)">✓</text>
+          <text x="86" y="258" font-family="-apple-system, sans-serif" font-size="13" font-weight="500" fill="var(--fg)">template.oft</text>
+          <text x="86" y="274" font-family="-apple-system, sans-serif" font-size="11" fill="var(--fg3)">→ template.eml</text>
+          <!-- Folder icon -->
+          <text x="412" y="267" text-anchor="middle" font-size="14" fill="var(--fg3)">📁</text>
+        </g>
+
+        <!-- Second result row -->
+        <g class="anim-result" style="animation-delay: 0.2s">
+          <rect x="40" y="290" width="392" height="44" rx="8" fill="var(--code-bg)"/>
+          <circle cx="66" cy="312" r="10" fill="var(--green)" opacity="0.15"/>
+          <text x="66" y="317" text-anchor="middle" font-size="14" fill="var(--green)">✓</text>
+          <text x="86" y="308" font-family="-apple-system, sans-serif" font-size="13" font-weight="500" fill="var(--fg)">newsletter.oft</text>
+          <text x="86" y="324" font-family="-apple-system, sans-serif" font-size="11" fill="var(--fg3)">→ newsletter.eml</text>
+          <text x="412" y="317" text-anchor="middle" font-size="14" fill="var(--fg3)">📁</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="container">
+    <h2>Everything you need, nothing you don't</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: color-mix(in srgb, var(--accent) 12%, transparent);">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M12 3v12m0 0l-4-4m4 4l4-4" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Drag & Drop</h3>
+        <p>Drop one or many .oft files onto the window. Converted .eml files appear right next to the originals.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: color-mix(in srgb, var(--green) 12%, transparent);">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="var(--green)" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Zero Setup</h3>
+        <p>On first launch the app installs its own Python environment and dependencies. Nothing for you to configure.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: color-mix(in srgb, var(--orange) 12%, transparent);">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M4 4h16v16H4z" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" rx="2"/><path d="M9 9h6M9 13h4" stroke="var(--orange)" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Perfect Fidelity</h3>
+        <p>HTML formatting, inline images with Content-IDs, plain text alternatives, and UTF-8 encoding — all preserved.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: color-mix(in srgb, #af52de 12%, transparent);">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 3a9 9 0 110 18 9 9 0 010-18z" stroke="#af52de" stroke-width="2"/><path d="M12 7v5l3 3" stroke="#af52de" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Fast</h3>
+        <p>Small files convert in under a second. Batch processing handles dozens of files at once.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: color-mix(in srgb, var(--accent) 12%, transparent);">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke="var(--accent)" stroke-width="2"/><path d="M8 21h8M12 17v4" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Native macOS</h3>
+        <p>Built with SwiftUI. SF Symbols, dark mode, and the system look & feel come free.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: color-mix(in srgb, var(--green) 12%, transparent);">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Conversion History</h3>
+        <p>See every result in the app window. One click to reveal the output file in Finder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="container">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Open the app</h3>
+        <p>Dependencies are installed automatically on first launch</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Drop .oft files</h3>
+        <p>Drag one or many files onto the window</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Get .eml files</h3>
+        <p>Converted files appear next to the originals</p>
+      </div>
+    </div>
+
+    <!-- Workflow SVG animation -->
+    <div class="mockup-wrap" style="padding-top:40px">
+      <svg width="600" height="120" viewBox="0 0 600 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Conversion workflow diagram">
+        <!-- OFT file -->
+        <rect x="20" y="20" width="100" height="80" rx="12" fill="var(--code-bg)" stroke="var(--card-border)"/>
+        <text x="70" y="55" text-anchor="middle" font-size="24">📎</text>
+        <text x="70" y="80" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" font-weight="600" fill="var(--accent)">.oft</text>
+
+        <!-- Arrow 1 -->
+        <line x1="140" y1="60" x2="210" y2="60" stroke="var(--fg3)" stroke-width="2" stroke-dasharray="6 4"/>
+        <polygon points="210,54 222,60 210,66" fill="var(--fg3)"/>
+
+        <!-- App -->
+        <rect x="230" y="15" width="140" height="90" rx="12" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="248" cy="32" r="4" fill="#FF5F57"/>
+        <circle cx="260" cy="32" r="4" fill="#FEBC2E"/>
+        <circle cx="272" cy="32" r="4" fill="#28C840"/>
+        <text x="300" y="72" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="500" fill="var(--fg)">OFT→EML</text>
+        <text x="300" y="88" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="var(--fg3)">Converter</text>
+
+        <!-- Arrow 2 -->
+        <line x1="388" y1="60" x2="458" y2="60" stroke="var(--fg3)" stroke-width="2" stroke-dasharray="6 4"/>
+        <polygon points="458,54 470,60 458,66" fill="var(--fg3)"/>
+
+        <!-- EML file -->
+        <rect x="480" y="20" width="100" height="80" rx="12" fill="color-mix(in srgb, var(--green) 8%, var(--code-bg))" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="530" y="55" text-anchor="middle" font-size="24">✉️</text>
+        <text x="530" y="80" text-anchor="middle" font-family="'SF Mono', monospace" font-size="13" font-weight="600" fill="var(--green)">.eml</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="install" id="install">
+  <div class="container">
+    <div class="install-card">
+      <h2>Get started in seconds</h2>
+      <p class="sub">Download the app or build from source</p>
+      <div class="buttons" style="justify-content:center">
+        <a class="btn btn-primary" href="https://github.com/trsdn/oft-eml-converter-mac/releases/latest">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download Latest Release
+        </a>
+      </div>
+      <div class="code-block">
+        <span class="cmd">git clone https://github.com/trsdn/oft-eml-converter-mac.git</span><br>
+        <span class="cmd">cd oft-eml-converter-mac</span><br>
+        <span class="cmd">./scripts/build.sh</span><br>
+        <span class="cmd">open OFT-EML-Converter.app</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>MIT License · Built with SwiftUI + Python · <a href="https://github.com/trsdn/oft-eml-converter-mac">View on GitHub</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
