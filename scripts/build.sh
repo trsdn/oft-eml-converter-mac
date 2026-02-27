@@ -23,10 +23,14 @@ mkdir -p "OFT-EML-Converter.app/Contents/"{MacOS,Resources}
 
 # Build Swift executable
 echo "🏗️  Compiling Swift code..."
+ARCH=$(uname -m)
 swiftc -o "OFT-EML-Converter.app/Contents/MacOS/OFT-EML-Converter" \
     src/OFTEMLConverter.swift \
+    -parse-as-library \
     -framework Cocoa \
-    -framework Foundation
+    -framework SwiftUI \
+    -framework UniformTypeIdentifiers \
+    -target ${ARCH}-apple-macosx14.0
 
 if [ $? -ne 0 ]; then
     echo "❌ Swift compilation failed"
@@ -91,7 +95,7 @@ cat > "OFT-EML-Converter.app/Contents/Info.plist" << 'EOF'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
-    <string>10.15</string>
+    <string>14.0</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>

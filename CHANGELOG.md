@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-02-27
+
+### Changed
+- **Complete SwiftUI rewrite** — Modern native macOS UI replacing the old NSApplication/Cocoa implementation
+- Minimum macOS version raised from 10.15 to **14.0 (Sonoma)**
+- Python search now includes `~/Library/Application Support/OFT-EML-Converter/venv`
+
+### Added
+- **Auto-dependency installation** — App automatically creates a Python venv and installs `extract_msg` on first launch
+- **No-Python detection** — Friendly "Download Python" screen with link to python.org if Python 3 is not installed
+- **Pip bootstrapping** — Falls back to `ensurepip` or `get-pip.py` if pip is missing from the venv
+- SF Symbols with animated visual feedback on drag hover
+- Progress spinner during file conversion with file count
+- Recent conversions list with success/failure status
+- "Reveal in Finder" button for converted files
+- "Clear" button for conversion history
+- Help menu with link to GitHub repository
+- Automatic dark mode support (built into SwiftUI)
+
+### Fixed
+- Python detection now actually runs `python3 --version` instead of just checking file existence (catches the macOS CLT stub)
+
 ## [1.0.0] - 2024-09-05
 
 ### Added
@@ -16,43 +38,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive error handling and user feedback
 - Professional application icon integration
 - Support for macOS 10.15+ (Catalina and later)
-
-### Features
-- **Drag & Drop Conversion**: Native macOS file handling
-- **Perfect Format Preservation**: 
-  - HTML and plain text content
-  - Inline images with Content-IDs
-  - Multipart/related MIME structure
-  - UTF-8 encoding for international text
-- **Reliable MSG Parsing**: Uses proven extract_msg library
-- **Smart Python Detection**: Automatically finds Python with dependencies
-- **Professional UI**: Native dialogs and error messages
-- **Batch Support**: Multiple file drag & drop
-
-### Technical Specifications
-- **Input Formats**: Microsoft Outlook Template (.oft) files
-- **Output Format**: RFC 5322 compliant EML files
-- **Architecture**: Swift UI + Python subprocess
-- **Dependencies**: Python 3.7+ with extract_msg library
-- **File Size Support**: Handles large files (750KB+ outputs tested)
-
-### Development Tools
-- Automated build system with `scripts/build.sh`
-- Dependency setup with `scripts/setup.sh`
-- Professional project structure for open source
-- Comprehensive documentation and contributing guidelines
-
-## [Unreleased]
-
-### Planned Features
-- Progress indicators for large file processing
-- Batch processing queue with cancel support
-- Additional output formats (MSG to EML direct conversion)
-- Drag & drop to Dock icon support
-- Quick Look plugin for OFT files
-
-### Possible Improvements
-- Persistent Python process for faster repeated conversions
-- Custom app icon sizes for different contexts
-- Preferences panel for Python path configuration
-- Integration with Apple's Shortcuts app
