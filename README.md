@@ -32,7 +32,34 @@ Grab the latest `.app` from [**Releases**](https://github.com/trsdn/oft-eml-conv
 ```bash
 git clone https://github.com/trsdn/oft-eml-converter-mac.git
 cd oft-eml-converter-mac
+<<<<<<< HEAD
 ./scripts/build.sh
+=======
+chmod +x scripts/setup.sh && ./scripts/setup.sh
+```
+
+### 2. Run Tests (Optional)
+```bash
+chmod +x scripts/test.sh && ./scripts/test.sh
+```
+
+### 3. Build Application
+```bash
+chmod +x scripts/build.sh && ./scripts/build.sh
+```
+
+For a signed DMG release, create `.release.env` from `.release.env.example`, then run:
+
+```bash
+scripts/release-macos.sh
+```
+
+The GitHub release workflow builds a signed, notarized DMG on `v*` tags. Configure these repository secrets first:
+`MACOS_CERTIFICATE`, `MACOS_CERTIFICATE_PWD`, `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD`.
+
+### 4. Launch & Use
+```bash
+>>>>>>> 2514459 (ci(release): add notarized macos dmg workflow)
 open OFT-EML-Converter.app
 ```
 

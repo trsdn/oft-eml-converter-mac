@@ -30,6 +30,10 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+.release.env
+release-build/
+*.dmg
+*.dmg.sha256
 downloads/
 eggs/
 .eggs/
@@ -50,6 +54,7 @@ env/
 ENV/
 
 # App Bundle (keep the structure but ignore contents during development)
+OFT-EML-Converter.app/
 *.app/Contents/MacOS/
 *.app/Contents/Resources/
 *.app/Contents/Info.plist
