@@ -1,174 +1,84 @@
-# AI Agent Development Guide
+# Agent instructions
 
-This document provides guidance for AI agents working with the OFT to EML Converter codebase.
+Read this before changing anything in this repository.
 
-## Project Context
+## What this repository is
 
-This is a native macOS application that converts Outlook Template (.oft) files to EML format. The project uses a hybrid architecture combining Swift for the native UI and Python for reliable MSG parsing.
+A native macOS application that converts Microsoft Outlook Template files (`.oft`) to `.eml`. It is a thin SwiftUI shell around a Python conversion script: the app handles drag-and-drop, progress, and results; `src/converter.py` does the parsing and MIME assembly through `extract_msg`.
 
-### Key Technical Concepts
+The app is signed, notarized, and distributed as a DMG. A change that reaches `main` can end up in a signed artifact on a user's machine, so the blast radius is larger than the repository suggests.
 
-- **Swift/Cocoa**: Native macOS drag & drop interface
-- **Python Bridge**: Subprocess communication to leverage extract_msg library
-- **MSG Format**: Complex compound document format requiring specialized parsing
-- **EML Output**: RFC 5322 compliant email format with multipart/related structure
-- **Inline Images**: Base64 encoded with Content-ID headers for proper display
+## What this repository is not
 
-## Architecture Overview
+It is not the cross-platform Python tool. That is [`trsdn/oft-eml-converter`](https://github.com/trsdn/oft-eml-converter), which has its own converter and its own release cadence. The two share an approach, not code. Fixing one does not fix the other.
 
-```
-┌─────────────────┐    subprocess    ┌──────────────────┐
-│   Swift App     │ ───────────────> │  Python Script  │
-│ (Native UI)     │                  │ (extract_msg)    │
-└─────────────────┘                  └──────────────────┘
-         │                                     │
-         v                                     v
-┌─────────────────┐                  ┌──────────────────┐
-│  User drags     │                  │   Perfect EML    │
-│  .oft files     │                  │   with images    │
-└─────────────────┘                  └──────────────────┘
-```
+## Layout
 
-## Critical Implementation Notes
+| Path | Purpose |
+|---|---|
+| `src/OFTEMLConverter.swift` | SwiftUI app: UI, drag-and-drop, dependency checker, subprocess bridge, About panel |
+| `src/converter.py` | Python conversion engine. Owns all OFT parsing and EML assembly |
+| `scripts/build.sh` | Builds the `.app` bundle and generates `Info.plist` |
+| `scripts/build-release.sh` | Signed build, plus the version guard that keeps tag and bundle in agreement |
+| `scripts/make-dmg.sh` | Packages the bundle into a signed DMG |
+| `scripts/notarize-dmg.sh` | Submits the DMG to Apple's notary service |
+| `scripts/release-macos.sh` | End-to-end signed and notarized release |
+| `scripts/setup.sh` | Manual dependency installer for development |
+| `scripts/test.sh` | Test suite runner |
+| `tests/` | Python and Swift tests |
+| `docs/index.html` | The published site. Self-contained, no external resources |
 
-### ⚠️ MSG Parsing - DO NOT IMPLEMENT MANUALLY
-The MSG/OFT format is extremely complex. **Always use the existing Python converter with extract_msg library**. Previous attempts at manual Swift parsing resulted in corrupted output.
+Generated, never hand-edit:
 
-**❌ Wrong Approach:**
-```swift
-// Don't try to parse MSG manually
-class MSGParser {
-    func parseCompoundDocument() { ... }
-}
-```
+- `OFT-EML-Converter.app/` and `dist/` — build output
+- `OFT-EML-Converter.app/Contents/Info.plist` — written by `scripts/build.sh` on every build
+- `.github/badges/conformance.svg` — rendered from `.github/conformance.yml`
+- `.github/stats/` — rendered by `.github/workflows/stats.yml`
 
-**✅ Correct Approach:**
-```swift
-// Use subprocess to call proven Python converter
-let process = Process()
-process.executableURL = URL(fileURLWithPath: pythonPath)
-process.arguments = [converterPath, input.path, output.path]
+## Setup
+
+```sh
+./scripts/setup.sh
 ```
 
-### Python Environment Detection
+Requires macOS 14 or newer, Xcode command line tools, and Python 3. The shipped app installs its own Python environment on first launch; `setup.sh` is for working on the repository.
 
-The app must handle multiple Python installations:
-1. Virtual environment (`venv/bin/python`) - highest priority
-2. Homebrew Python (`/opt/homebrew/bin/python3`)
-3. System Python (`/usr/bin/python3`)
+## Run
 
-Always test that the chosen Python has `extract_msg` available before attempting conversion.
-
-## File Structure
-
-```
-├── src/
-│   ├── OFTEMLConverter.swift    # Native macOS app (main implementation)
-│   └── converter.py             # Python converter (DO NOT MODIFY)
-├── scripts/
-│   ├── build.sh                # App bundle builder
-│   ├── setup.sh                # Dependency installer
-│   └── test.sh                 # Test runner
-├── tests/
-│   ├── test_converter.py       # Python unit tests
-│   └── test_app.swift         # Swift integration tests
-└── examples/
-    └── sample.oft              # Test file (~548KB with images)
+```sh
+./scripts/build.sh
+open OFT-EML-Converter.app
 ```
 
-## Development Guidelines
+## Validate before proposing a change
 
-### Testing Strategy
-1. **Python Tests**: Unit tests for converter functionality
-2. **Swift Tests**: Integration tests for macOS app
-3. **Build Tests**: Full compilation and bundle creation
-4. **Performance Tests**: Large file handling (>5MB)
+This is the single command that must succeed:
 
-### Common Issues and Solutions
-
-**"Conversion failed" Error**
-- Usually means extract_msg not installed
-- Run `./scripts/setup.sh` to fix dependencies
-
-**"Python not found" Error**
-- Check Python path detection logic in Swift app
-- Ensure Python is in expected locations
-
-**Output Quality Issues**
-- Never modify the Python converter
-- All quality issues should be addressed via extract_msg updates
-
-### Build Process
-
-```bash
-./scripts/setup.sh    # Install dependencies
-./scripts/test.sh     # Run full test suite
-./scripts/build.sh    # Create app bundle
+```sh
+./scripts/test.sh
 ```
 
-## Code Modification Guidelines
+It runs the Python converter tests and the Swift integration tests. A change that only compiles is not validated.
 
-### Safe to Modify
-- Swift UI components and drag/drop handling
-- Error messages and user feedback
-- Build scripts and documentation
-- Test cases and validation
+## Conventions
 
-### DO NOT MODIFY
-- `src/converter.py` - This is the proven conversion engine
-- Core subprocess communication logic
-- Python dependency requirements
+- **Identity comes from the build, never from a literal.** `Info.plist` is generated by `scripts/build.sh` and takes its version from `APP_VERSION`, which the release workflow sets from the tag. Do not hardcode a version, a bundle identifier, or a copyright line anywhere. The About panel reads Info.plist for the same reason.
+- **`CFBundleIdentifier` is `com.trsdn.oft-eml-converter` and does not change.** macOS keys permissions, preferences, and update matching to it. Changing it makes every existing install a different application.
+- The Swift app must not grow conversion logic. Parsing belongs in `src/converter.py`.
+- The site under `docs/` loads no external fonts, scripts, images, or analytics. Keep it that way; that property is assessed.
+- User-facing strings are English.
 
-### When Adding Features
+## Do not do these
 
-1. **UI Enhancements**: Modify Swift app only
-2. **Conversion Features**: Update Python converter carefully with thorough testing
-3. **New File Types**: Ensure extract_msg supports them first
+- Do not rewrite history, force push, or delete branches.
+- Do not commit secrets, tokens, credentials, certificates, or personal data. `.release.env` holds signing configuration and is ignored — never track it, never echo it into a log.
+- Do not run `scripts/release-macos.sh`, `scripts/notarize-dmg.sh`, or `scripts/build-release.sh` with real credentials. Releases are cut by the maintainer through a tag.
+- Do not create or move tags. A `v*` tag triggers a signed, notarized, published release.
+- Do not change the bundle identifier.
+- Do not hand-edit generated files. The paths and their generators are listed under [Layout](#layout).
+- Do not implement MSG or OFT binary parsing by hand. It is delegated to `extract_msg` on purpose.
+- Do not add analytics, telemetry, crash reporting, or any runtime network call. The README states the app contacts no network service, and that statement is assessed.
 
-## Testing Requirements
+## Attribution
 
-Before any modification:
-1. Run full test suite: `./scripts/test.sh`
-2. Test with real OFT files, especially large ones with images
-3. Verify EML output opens correctly in email clients
-4. Check performance with files >10MB
-
-## Debugging
-
-### Verbose Output
-```bash
-# Enable detailed conversion logging
-python3 src/converter.py input.oft output.eml --verbose
-
-# Check subprocess communication
-# Add debug prints in Swift app's runPythonConverter method
-```
-
-### Common Debug Checks
-- Python path resolution
-- extract_msg library availability
-- File permissions and paths
-- Subprocess stdout/stderr
-- EML format validation
-
-## Performance Expectations
-
-- Small OFT (<1MB): ~1-2 seconds
-- Large OFT (>5MB): ~3-5 seconds  
-- Memory usage: <50MB peak
-- Output size: ~1.3x input size (due to base64 encoding)
-
-## Quality Assurance
-
-The converted EML must have:
-- ✅ Proper RFC 5322 headers
-- ✅ multipart/related structure for images
-- ✅ Base64 encoded inline images with Content-ID
-- ✅ UTF-8 encoding for international text
-- ✅ Original HTML and text formatting preserved
-
-Any modification that breaks these requirements is unacceptable.
-
----
-
-**Remember**: This project's success depends on leveraging proven libraries (extract_msg) rather than reimplementing complex formats. Focus on the native macOS experience while maintaining conversion reliability.
+Agent-authored commits carry a `Co-authored-by:` trailer naming the agent. Changes reach `main` through a pull request; the required check is `Test Suite`. Automation does not merge its own work and does not publish releases.
