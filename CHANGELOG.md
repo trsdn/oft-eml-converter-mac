@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **The app bundle no longer ships a placeholder identity.** `CFBundleIdentifier` was `com.example.oft-eml-converter` in every signed and notarized build up to and including v2.0.0, and the bundle reported version `1.0` regardless of the release it was cut from.
+
+  `CFBundleIdentifier` is now `com.trsdn.oft-eml-converter`. **macOS treats this as a different application**: an existing install keeps its own permissions and preferences, and the new build starts from a clean slate. Granting file access again on first use after upgrading is expected.
+
+### Added
+
+- Version, build number, copyright, repository URL, and issue tracker URL are injected into `Info.plist` by the build, taken from the release tag. The release build refuses to continue when the tag and the built bundle disagree.
+- An About panel showing the running version and linking to the repository and the issue tracker, plus a "Report an Issue" item in the Help menu.
+- `SECURITY.md`, including how to verify the signature of a downloaded DMG.
+- `AGENTS.md`, replacing `AGENT.md`, rewritten as operating instructions rather than a development guide.
+- CI checks that fail when the bundle identity is hardcoded again, and when the published site starts loading a third-party resource.
+- Declared primary language, data handling, network destinations, and accessibility limitations in the README and on the site.
+- `prefers-reduced-motion` support on the published site.
+
 ## [2.0.0] - 2026-02-27
 
 ### Changed

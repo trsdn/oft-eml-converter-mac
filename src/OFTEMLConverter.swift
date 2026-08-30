@@ -13,14 +13,82 @@ struct OFTEMLConverterApp: App {
         }
         .defaultSize(width: 520, height: 460)
         .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("About OFT EML Converter") {
+                    AppIdentity.showAboutPanel()
+                }
+            }
             CommandGroup(replacing: .help) {
                 Button("OFT-EML Converter on GitHub") {
-                    NSWorkspace.shared.open(
-                        URL(string: "https://github.com/trsdn/oft-eml-converter-mac")!
-                    )
+                    NSWorkspace.shared.open(AppIdentity.repositoryURL)
+                }
+                Button("Report an Issue") {
+                    NSWorkspace.shared.open(AppIdentity.issueTrackerURL)
                 }
             }
         }
+    }
+}
+
+/// Reads the identity the build embedded in Info.plist. Nothing here is
+/// hardcoded, so the About panel cannot disagree with the released artifact.
+enum AppIdentity {
+    private static func string(_ key: String, fallback: String) -> String {
+        Bundle.main.object(forInfoDictionaryKey: key) as? String ?? fallback
+    }
+
+    static var version: String {
+        string("CFBundleShortVersionString", fallback: "unknown")
+    }
+
+    static var build: String {
+        string("CFBundleVersion", fallback: "unknown")
+    }
+
+    static var copyright: String {
+        string("NSHumanReadableCopyright", fallback: "")
+    }
+
+    static var repositoryURL: URL {
+        URL(string: string("TRSDNRepositoryURL",
+                           fallback: "https://github.com/trsdn/oft-eml-converter-mac"))!
+    }
+
+    static var issueTrackerURL: URL {
+        URL(string: string("TRSDNIssueTrackerURL",
+                           fallback: "https://github.com/trsdn/oft-eml-converter-mac/issues"))!
+    }
+
+    static func showAboutPanel() {
+        let credits = NSMutableAttributedString()
+        let body: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        ]
+
+        credits.append(NSAttributedString(
+            string: "Converts Outlook Template files to EML, entirely on this Mac.\n\n",
+            attributes: body
+        ))
+        credits.append(link("Source code", to: repositoryURL, base: body))
+        credits.append(NSAttributedString(string: "   ", attributes: body))
+        credits.append(link("Report an issue", to: issueTrackerURL, base: body))
+
+        NSApplication.shared.orderFrontStandardAboutPanel(options: [
+            .applicationVersion: version,
+            .version: build,
+            .credits: credits
+        ])
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    private static func link(
+        _ label: String,
+        to url: URL,
+        base: [NSAttributedString.Key: Any]
+    ) -> NSAttributedString {
+        var attributes = base
+        attributes[.link] = url
+        return NSAttributedString(string: label, attributes: attributes)
     }
 }
 

@@ -75,7 +75,22 @@ fi
 
 # Copy Info.plist
 echo "📋 Creating Info.plist..."
-cat > "OFT-EML-Converter.app/Contents/Info.plist" << 'EOF'
+
+# Identity is derived, never hand-maintained (criterion I06). APP_VERSION is set
+# by the release build from the tag; a local build falls back to the newest tag
+# and finally to a marker that is obviously not a release.
+APP_VERSION="${APP_VERSION:-}"
+if [ -z "$APP_VERSION" ]; then
+    APP_VERSION="$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || true)"
+fi
+if [ -z "$APP_VERSION" ]; then
+    APP_VERSION="0.0.0-dev"
+fi
+BUILD_VERSION="${BUILD_VERSION:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}"
+REPOSITORY_URL="https://github.com/trsdn/oft-eml-converter-mac"
+COPYRIGHT="Copyright © $(date +%Y) Torsten Mahr. MIT licensed."
+
+cat > "OFT-EML-Converter.app/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -83,17 +98,25 @@ cat > "OFT-EML-Converter.app/Contents/Info.plist" << 'EOF'
     <key>CFBundleExecutable</key>
     <string>OFT-EML-Converter</string>
     <key>CFBundleIdentifier</key>
-    <string>com.example.oft-eml-converter</string>
+    <string>com.trsdn.oft-eml-converter</string>
     <key>CFBundleName</key>
     <string>OFT EML Converter</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>${BUILD_VERSION}</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>${APP_VERSION}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>${COPYRIGHT}</string>
+    <key>TRSDNRepositoryURL</key>
+    <string>${REPOSITORY_URL}</string>
+    <key>TRSDNIssueTrackerURL</key>
+    <string>${REPOSITORY_URL}/issues</string>
+    <key>TRSDNLicense</key>
+    <string>MIT</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSPrincipalClass</key>
@@ -118,6 +141,8 @@ cat > "OFT-EML-Converter.app/Contents/Info.plist" << 'EOF'
 </dict>
 </plist>
 EOF
+
+echo "   version ${APP_VERSION} (build ${BUILD_VERSION})"
 
 # Make executable
 chmod +x "OFT-EML-Converter.app/Contents/MacOS/OFT-EML-Converter"
