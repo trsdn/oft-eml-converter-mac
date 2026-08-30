@@ -1,40 +1,34 @@
 # OFT to EML Converter for macOS
-
-<div align="center">
-
-![OFT to EML Converter Demo](docs/app-demo.gif)
-
-**Convert Outlook Template (.oft) files to EML — just drag and drop.**
-
-[![macOS](https://img.shields.io/badge/macOS-14+-blue.svg)](https://developer.apple.com/macos/)
-[![Swift](https://img.shields.io/badge/SwiftUI-6-orange.svg)](https://swift.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-</div>
-
-A lightweight macOS app that converts `.oft` files to standard `.eml` format. No configuration needed — it installs its own Python environment on first launch.
-
-## Features
-
-- **Drag & drop** — drop one or many `.oft` files, get `.eml` files next to them
-- **Zero setup** — auto-installs Python dependencies into a private venv on first run
-- **Native UI** — SwiftUI with SF Symbols, dark mode, animated hover states, and progress feedback
-- **Conversion history** — see results, reveal output files in Finder, clear the list
-- **Reliable parsing** — uses the proven [extract_msg](https://github.com/TeamMsgExtractor/msg-extractor) library under the hood
-- **Preserves everything** — HTML, plain text, inline images with Content-IDs, UTF-8 encoding
-
-## Quick Start
-
 ### Download
 
-Grab the latest `.app` from [**Releases**](https://github.com/trsdn/oft-eml-converter-mac/releases), or build from source:
+Grab the latest signed DMG from [**Releases**](https://github.com/trsdn/oft-eml-converter-mac/releases), or build from source:
 
 ```bash
 git clone https://github.com/trsdn/oft-eml-converter-mac.git
 cd oft-eml-converter-mac
-<<<<<<< HEAD
 ./scripts/build.sh
-=======
+open OFT-EML-Converter.app
+```
+
+For a signed DMG release, create `.release.env` from `.release.env.example`, then run:
+
+```bash
+scripts/release-macos.sh
+```
+
+The GitHub release workflow builds a signed, notarized DMG on `v*` tags. Configure these repository secrets first:
+`MACOS_CERTIFICATE`, `MACOS_CERTIFICATE_PWD`, `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD`.
+|:---:|:---:|
+| ![Drag Drop](docs/drag-drop.png) | ![Success](docs/success.png) |
+
+</div>
+
+## Quick Start
+
+### 1. Setup Dependencies
+```bash
+git clone https://github.com/yourusername/oft-eml-converter-mac.git
+cd oft-eml-converter-mac
 chmod +x scripts/setup.sh && ./scripts/setup.sh
 ```
 
@@ -59,69 +53,112 @@ The GitHub release workflow builds a signed, notarized DMG on `v*` tags. Configu
 
 ### 4. Launch & Use
 ```bash
->>>>>>> 2514459 (ci(release): add notarized macos dmg workflow)
 open OFT-EML-Converter.app
 ```
 
-### What happens on first launch
-
-1. The app checks for Python 3 and the `extract_msg` library
-2. If missing, it creates a virtual environment in `~/Library/Application Support/OFT-EML-Converter/venv` and installs everything automatically
-3. If Python itself is missing, you'll see a **Download Python** button linking to [python.org](https://www.python.org/downloads/macos/)
-
-No `pip install`, no `brew`, no terminal needed.
+Drag `.oft` files onto the application window to convert them to `.eml` format.
 
 ## System Requirements
 
-- **macOS 14** (Sonoma) or later
-- **Python 3** — the app will guide you if it's not installed
+- **macOS 10.15** (Catalina) or later
+- **Python 3.7+** (usually pre-installed on macOS)
+- **Xcode Command Line Tools** (for building from source)
 
-## Command Line
+## Architecture
 
-You can also convert files directly:
-
-```bash
-python3 src/converter.py input.oft output.eml
+```mermaid
+graph TD
+    A[Swift macOS App] --> B[Python Subprocess]
+    B --> C[extract_msg Library] 
+    C --> D[Perfect EML Output]
+    
+    E[User drags OFT] --> A
+    A --> F[Native UI Feedback]
+    D --> G[EML with Inline Images]
 ```
 
-## How It Works
-
-```
-┌──────────────────┐   subprocess   ┌─────────────────┐
-│  SwiftUI App     │ ────────────►  │  converter.py   │
-│  (drag & drop)   │                │  (extract_msg)  │
-└──────────────────┘                └─────────────────┘
-         │                                   │
-    native UI                          .eml output
-    feedback                        with inline images
-```
-
-The app is a thin SwiftUI shell that delegates parsing to a Python script via subprocess. This keeps the UI fast and native while leveraging the battle-tested `extract_msg` library for the complex MSG/OFT binary format.
+This hybrid approach combines:
+- **Swift/Cocoa** for native macOS user experience
+- **Python extract_msg** for reliable MSG/OFT parsing
+- **Subprocess communication** for clean separation of concerns
 
 ## Project Structure
 
 ```
-src/
-├── OFTEMLConverter.swift   # SwiftUI app, dependency checker, converter bridge
-└── converter.py            # Python OFT→EML conversion engine
-scripts/
-├── build.sh                # Builds the .app bundle
-├── setup.sh                # Manual dependency installer (optional)
-└── test.sh                 # Test suite runner
-tests/
-├── test_app.swift          # Swift integration tests
-└── test_converter.py       # Python unit tests
+├── src/                      # Source code
+│   ├── OFTEMLConverter.swift # Native macOS app
+│   └── converter.py          # Python MSG parser
+├── scripts/                  # Build and setup scripts
+│   ├── build.sh             # App builder
+│   └── setup.sh             # Dependency installer
+├── assets/                   # Resources
+│   └── icon.png             # Application icon
+├── examples/                 # Sample files
+│   └── sample.oft           # Test OFT file
+├── docs/                    # Documentation
+└── README.md               # This file
 ```
+
+## Advanced Usage
+
+### Command Line Conversion
+If you prefer command line usage:
+```bash
+python src/converter.py input.oft output.eml
+```
+
+### Batch Conversion
+The GUI supports multiple file drag & drop for batch processing.
+
+### Custom Python Environment
+The app automatically detects and uses:
+1. Virtual environment Python (if `venv/` exists)
+2. Homebrew Python (`/opt/homebrew/bin/python3`)
+3. System Python (`/usr/bin/python3`)
+
+## Troubleshooting
+
+### "Python not found" Error
+Run the setup script to install dependencies:
+```bash
+./scripts/setup.sh
+```
+
+### "extract_msg not available" Error
+Install manually for your Python:
+```bash
+pip3 install --break-system-packages extract_msg
+```
+
+### Detailed Error Information
+The app provides comprehensive error messages including:
+- Python paths attempted
+- Exact error from subprocess
+- Working directory and file paths
+- Full command line used
 
 ## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes
-4. Push and open a Pull Request
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-This project uses [extract_msg](https://github.com/TeamMsgExtractor/msg-extractor) (GPL-3.0) as a runtime dependency installed separately via pip. The MIT license applies to the source code in this repository.
+## Acknowledgments
+
+- Built with [extract_msg](https://github.com/TeamMsgExtractor/msg-extractor) library
+- Inspired by the need for reliable OFT to EML conversion on macOS
+- Thanks to the Swift and Python communities
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the macOS community**
+
+</div>
