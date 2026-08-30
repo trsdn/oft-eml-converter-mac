@@ -1,0 +1,88 @@
+name: Standard
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: Conformance record
+    uses: trsdn/.github/.github/workflows/conformance.yml@main
+
+  identity:
+    name: Product identity
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # I06: identity must come from the build. A literal version or a
+      # placeholder identifier reaching a signed artifact is what this catches.
+      - name: Bundle identity is derived, not hardcoded
+        run: |
+          set -euo pipefail
+          chmod +x scripts/*.sh
+          APP_VERSION="9.9.9-check" ./scripts/build.sh >/dev/null
+
+          plist="OFT-EML-Converter.app/Contents/Info.plist"
+          read_key() { /usr/libexec/PlistBuddy -c "Print :$1" "$plist"; }
+
+          version="$(read_key CFBundleShortVersionString)"
+          identifier="$(read_key CFBundleIdentifier)"
+
+          if [ "$version" != "9.9.9-check" ]; then
+            echo "build.sh ignored APP_VERSION: bundle reports '$version'" >&2
+            exit 1
+          fi
+          case "$identifier" in
+            com.example.*)
+              echo "bundle identifier is still a placeholder: $identifier" >&2
+              exit 1
+              ;;
+          esac
+
+          for key in NSHumanReadableCopyright TRSDNRepositoryURL TRSDNIssueTrackerURL; do
+            if ! read_key "$key" >/dev/null 2>&1; then
+              echo "Info.plist is missing $key" >&2
+              exit 1
+            fi
+          done
+
+          echo "identity ok: $identifier $version"
+
+      # P08: the macOS badge is hand-written, so a check has to fail when it
+      # drifts from the minimum the build actually sets.
+      - name: macOS badge matches LSMinimumSystemVersion
+        run: |
+          set -euo pipefail
+          badge="$(sed -n 's|.*shields\.io/badge/macOS-\([0-9]*\)+-blue.*|\1|p' README.md | head -1)"
+          minimum="$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' OFT-EML-Converter.app/Contents/Info.plist | cut -d. -f1)"
+          if [ "$badge" != "$minimum" ]; then
+            echo "README badge claims macOS $badge, build sets minimum $minimum" >&2
+            exit 1
+          fi
+          echo "macOS badge and build minimum agree on $badge"
+
+  site:
+    name: Site self-containment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # W07: the site must load nothing from a third-party host. Anchors are
+      # fine; fetched sub-resources are not.
+      - name: Site loads no external resources
+        run: |
+          set -euo pipefail
+          if grep -noE '<(script|link|img|iframe|source)[^>]*(src|href)="https?://[^"]*"' docs/index.html \
+             | grep -v 'rel="canonical"'; then
+            echo "docs/index.html references an external resource" >&2
+            exit 1
+          fi
+          echo "site is self-contained"

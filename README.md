@@ -6,13 +6,19 @@
 
 **Convert Outlook Template (.oft) files to EML — just drag and drop.**
 
-[![macOS](https://img.shields.io/badge/macOS-14+-blue.svg)](https://developer.apple.com/macos/)
-[![Swift](https://img.shields.io/badge/SwiftUI-6-orange.svg)](https://swift.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/trsdn/oft-eml-converter-mac)](LICENSE)
+[![macOS](https://img.shields.io/badge/macOS-14+-blue.svg)](#system-requirements)
+[![Test Suite](https://github.com/trsdn/oft-eml-converter-mac/actions/workflows/test.yml/badge.svg)](https://github.com/trsdn/oft-eml-converter-mac/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/trsdn/oft-eml-converter-mac)](https://github.com/trsdn/oft-eml-converter-mac/releases)
+[![Conformance](.github/badges/conformance.svg)](docs/self-assessment.md)
 
 </div>
 
 A lightweight macOS app that converts `.oft` files to standard `.eml` format. No configuration needed — it installs its own Python environment on first launch.
+
+Its language is English, and it ships no localized content. See `L01` and `L03`.
+
+**Everything happens on your Mac.** The app reads the files you drop on it and writes the results next to them. It transmits nothing. See [Data handling](#data-handling).
 
 ## Features
 
@@ -49,6 +55,27 @@ No `pip install`, no `brew`, no terminal needed.
 - **macOS 14** (Sonoma) or later
 - **Python 3** — the app will guide you if it's not installed
 
+## Data handling
+
+- **What is collected:** nothing. No telemetry, no analytics, no crash reporting.
+- **What is transmitted:** nothing. Conversion runs locally, and the app does not resolve remote references even when the HTML body it copies contains them.
+- **What is stored, and where:** converted `.eml` files land next to their source. The app keeps its private Python environment in `~/Library/Application Support/OFT-EML-Converter/`. Delete that folder to reset the app completely; it is recreated on the next launch.
+- **Outbound network destinations:** two, neither of them during conversion.
+  - **PyPI**, once on first launch, to install `extract_msg` into the private environment.
+  - **Apple's notarization check**, performed by macOS itself the first time you open the app. That is Gatekeeper, not this application.
+
+## Accessibility
+
+- The app is a standard AppKit-hosted SwiftUI application, so it inherits system text sizing, Dark Mode, and Increase Contrast.
+- Files can be opened without dragging: the window's file picker is reachable from the keyboard, and the command line entry point below does the same job without any GUI at all.
+- **Known limitations, stated rather than left to be discovered:** the interface has not been audited with VoiceOver, and the accessible names of its custom drop area come from SwiftUI defaults rather than from labels chosen for the purpose. Full keyboard operability of the drop area has not been verified. Tracked in [#10](https://github.com/trsdn/oft-eml-converter-mac/issues/10).
+
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Releases are tagged `vMAJOR.MINOR.PATCH`, and the tag is the single source of the version embedded in the app bundle — `CFBundleShortVersionString` is injected by the release build and verified against the tag before anything is signed.
+
+The running version is shown under **OFT EML Converter → About**, alongside links to the repository and the issue tracker. See the [changelog](CHANGELOG.md).
+
 ## Command Line
 
 You can also convert files directly:
@@ -67,6 +94,12 @@ scripts/release-macos.sh
 
 Pushing a `v*` tag triggers the GitHub release workflow, which builds and notarizes the DMG automatically. It requires these repository secrets: `MACOS_CERTIFICATE`, `MACOS_CERTIFICATE_PWD`, `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_APP_PASSWORD`.
 
+The version in the bundle is taken from the tag, never written by hand, and the release build stops if the two disagree.
+
+## Published site
+
+[trsdn.github.io/oft-eml-converter-mac](https://trsdn.github.io/oft-eml-converter-mac/) is served by GitHub Pages from the `docs/` directory on `main`. It is a single self-contained page: no external fonts, scripts, images, or analytics, which a CI check enforces on every push.
+
 ## How It Works
 
 ```
@@ -83,29 +116,28 @@ The app is a thin SwiftUI shell that delegates parsing to a Python script via su
 
 ## Project Structure
 
-```
-src/
-├── OFTEMLConverter.swift   # SwiftUI app, dependency checker, converter bridge
-└── converter.py            # Python OFT→EML conversion engine
-scripts/
-├── build.sh                # Builds the .app bundle
-├── setup.sh                # Manual dependency installer (optional)
-├── test.sh                 # Test suite runner
-├── build-release.sh        # Signed .app build for distribution
-├── make-dmg.sh             # Packages the .app into a signed DMG
-├── notarize-dmg.sh         # Submits the DMG to Apple notary service
-└── release-macos.sh        # End-to-end signed + notarized release
-tests/
-├── test_app.swift          # Swift integration tests
-└── test_converter.py       # Python unit tests
-```
+The repository layout, the authoritative build and validation commands, and the paths that are generated rather than hand-maintained are documented once, in [AGENTS.md](AGENTS.md).
+
+Deeper background lives in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/TESTING.md](docs/TESTING.md).
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes
-4. Push and open a Pull Request
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Security
+
+Report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
+
+## Support status
+
+Actively maintained by [@trsdn](https://github.com/trsdn). Issues and pull requests are welcome; response times are best-effort.
+
+## Repository activity
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/stats/repo-card-dark.svg">
+  <img alt="Repository statistics" src=".github/stats/repo-card.svg">
+</picture>
 
 ## License
 
