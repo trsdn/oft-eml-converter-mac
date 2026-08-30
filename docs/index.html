@@ -279,6 +279,25 @@ footer a:hover { color: var(--accent); }
 .anim-check { animation: checkPop 4s ease-out infinite; }
 .anim-glow { animation: dropZoneGlow 4s ease-in-out infinite; }
 .anim-result { animation: resultSlide 4s ease-out infinite; }
+
+/* Content baseline: status, data disclosure, and freshness (criterion W04). */
+.status { font-size: 14px; color: var(--fg2); margin: -8px 0 28px; }
+.status-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #28C840; margin-right: 7px; vertical-align: baseline;
+}
+.status-sep { margin: 0 8px; opacity: 0.5; }
+.privacy {
+  max-width: 620px; margin: 0 auto 18px; font-size: 14px;
+  line-height: 1.65; color: var(--fg2);
+}
+.footer-links { font-size: 14px; margin-bottom: 8px; }
+.reviewed { font-size: 13px; color: var(--fg3); }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-file, .anim-cursor, .anim-spinner,
+  .anim-check, .anim-glow, .anim-result { animation: none; }
+}
 </style>
 </head>
 <body>
@@ -300,6 +319,11 @@ footer a:hover { color: var(--accent); }
   <div class="container">
     <h1>Convert <span class="accent">.oft</span> to <span class="accent">.eml</span><br>on your Mac</h1>
     <p class="sub">Drag and drop Outlook templates. Get standard email files. No setup required.</p>
+    <p class="status">
+      <span class="status-dot" aria-hidden="true"></span>Actively maintained
+      <span class="status-sep">·</span>This page describes <strong>v2.0.0</strong>
+      <span class="status-sep">·</span>Requires macOS 14 or later
+    </p>
     <div class="buttons">
       <a class="btn btn-primary" href="https://github.com/trsdn/oft-eml-converter-mac/releases/latest">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -500,7 +524,20 @@ footer a:hover { color: var(--accent); }
         Buy me a coffee
       </a>
     </p>
-    <p>MIT License · Built with SwiftUI + Python · <a href="https://aitorsten.com">aitorsten.com</a> · <a href="https://github.com/trsdn/oft-eml-converter-mac">GitHub</a></p>
+    <p class="privacy">
+      Everything happens on your Mac. The app reads the files you drop on it and writes the results next to them.
+      It collects nothing, transmits nothing, and contains no telemetry or analytics. The only connections it ever makes
+      are a one-time download of its Python dependency on first launch, and the notarization check macOS itself performs
+      when you first open it.
+    </p>
+    <p class="footer-links">
+      <a href="https://github.com/trsdn/oft-eml-converter-mac">Repository</a> ·
+      <a href="https://github.com/trsdn/oft-eml-converter-mac/blob/main/LICENSE">MIT License</a> ·
+      <a href="https://github.com/trsdn/oft-eml-converter-mac/blob/main/SECURITY.md">Security policy</a> ·
+      <a href="https://github.com/trsdn/oft-eml-converter-mac/issues">Support</a> ·
+      <a href="https://aitorsten.com">aitorsten.com</a>
+    </p>
+    <p class="reviewed">Built with SwiftUI and Python · Page last reviewed 2026-08-30</p>
   </div>
 </footer>
 
