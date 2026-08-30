@@ -27,39 +27,12 @@ A lightweight macOS app that converts `.oft` files to standard `.eml` format. No
 
 ### Download
 
-Grab the latest `.app` from [**Releases**](https://github.com/trsdn/oft-eml-converter-mac/releases), or build from source:
+Grab the latest signed DMG from [**Releases**](https://github.com/trsdn/oft-eml-converter-mac/releases), or build from source:
 
 ```bash
 git clone https://github.com/trsdn/oft-eml-converter-mac.git
 cd oft-eml-converter-mac
-<<<<<<< HEAD
 ./scripts/build.sh
-=======
-chmod +x scripts/setup.sh && ./scripts/setup.sh
-```
-
-### 2. Run Tests (Optional)
-```bash
-chmod +x scripts/test.sh && ./scripts/test.sh
-```
-
-### 3. Build Application
-```bash
-chmod +x scripts/build.sh && ./scripts/build.sh
-```
-
-For a signed DMG release, create `.release.env` from `.release.env.example`, then run:
-
-```bash
-scripts/release-macos.sh
-```
-
-The GitHub release workflow builds a signed, notarized DMG on `v*` tags. Configure these repository secrets first:
-`MACOS_CERTIFICATE`, `MACOS_CERTIFICATE_PWD`, `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD`.
-
-### 4. Launch & Use
-```bash
->>>>>>> 2514459 (ci(release): add notarized macos dmg workflow)
 open OFT-EML-Converter.app
 ```
 
@@ -84,6 +57,16 @@ You can also convert files directly:
 python3 src/converter.py input.oft output.eml
 ```
 
+## Signed Releases
+
+To build a signed and notarized DMG locally, copy `.release.env.example` to `.release.env`, fill in your Apple Developer details, then run:
+
+```bash
+scripts/release-macos.sh
+```
+
+Pushing a `v*` tag triggers the GitHub release workflow, which builds and notarizes the DMG automatically. It requires these repository secrets: `MACOS_CERTIFICATE`, `MACOS_CERTIFICATE_PWD`, `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_APP_PASSWORD`.
+
 ## How It Works
 
 ```
@@ -107,7 +90,11 @@ src/
 scripts/
 ├── build.sh                # Builds the .app bundle
 ├── setup.sh                # Manual dependency installer (optional)
-└── test.sh                 # Test suite runner
+├── test.sh                 # Test suite runner
+├── build-release.sh        # Signed .app build for distribution
+├── make-dmg.sh             # Packages the .app into a signed DMG
+├── notarize-dmg.sh         # Submits the DMG to Apple notary service
+└── release-macos.sh        # End-to-end signed + notarized release
 tests/
 ├── test_app.swift          # Swift integration tests
 └── test_converter.py       # Python unit tests
