@@ -18,7 +18,7 @@ jobs:
     name: Product identity
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -73,7 +73,7 @@ jobs:
     name: Site self-containment
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # W07: the site must load nothing from a third-party host. Anchors are
       # fine; fetched sub-resources are not.
